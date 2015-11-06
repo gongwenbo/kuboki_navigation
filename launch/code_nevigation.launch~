@@ -1,0 +1,33 @@
+<launch>
+
+  <include file="$(find turtlebot_bringup)/launch/minimal.launch" />
+
+
+	<node pkg="nodelet" type="nodelet" name="dock_drive" args="load kobuki_auto_docking/AutoDockingNodelet mobile_base_nodelet_manager">
+    <rosparam file="$(find kobuki_auto_docking)/param/auto_docking.yaml" command="load"/>
+    <remap from="dock_drive/odom" to="odom"/>
+    <remap from="dock_drive/core" to="mobile_base/sensors/core"/>
+    <remap from="dock_drive/dock_ir" to="mobile_base/sensors/dock_ir"/>
+    <remap from="dock_drive/motor_power" to="mobile_base/commands/motor_power"/>
+    <remap from="dock_drive/velocity" to="mobile_base/commands/velocity"/>
+  </node>
+
+
+
+  <include file="$(find rplidar_ros)/launch/rplidar.launch" />
+  <node pkg="tf" type="static_transform_publisher" name="base_link_to_laser" args="0 0 0.1 0 0 0 base_link laser 100" />
+  <include file="$(find turtlebot_teleop)/launch/logitech.launch" />
+
+  
+<!--<include file="$(find turtlebot_navigation)/launch/amcl_demo.launch" /> -->
+<arg name="map_file" default="$(find tars_slam)/maps/map.yaml"/>
+<node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+<include file="$(find tars_slam)/launch/includes/amcl.launch.xml">
+</include>
+
+  <include file="$(find tars_slam)/launch/includes/move_base.launch.xml"/> 
+<!--<arg name="custom_param_file" value="$(arg custom_param_file)"/> -->
+
+
+
+</launch>
